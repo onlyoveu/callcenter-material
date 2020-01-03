@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
+import {ContentTabService} from '../content-tab.service';
 
 @Component({
   selector: 'app-left-content',
@@ -7,9 +8,13 @@ import { Component, OnInit } from '@angular/core';
 })
 export class LeftContentComponent implements OnInit {
 
-  constructor() { }
+  constructor(private contentTabService: ContentTabService) {
+  }
 
   ngOnInit() {
   }
 
+  addTab() {
+    this.contentTabService.addTab('new');
+  }
 }
