@@ -1,0 +1,63 @@
+<mat-toolbar class="top-bar">
+  <mat-toolbar-row class="top-bar-row">
+
+    <!--    搜索框开始    -->
+    <mat-form-field>
+      <label>
+        <input matInput placeholder="" [formControl]="phoneNo">
+      </label>
+      <button mat-icon-button matSuffix (click)="searchPhoneNo()">
+        <mat-icon>search</mat-icon>
+      </button>
+    </mat-form-field>
+    <!--    搜索框结束    -->
+
+    <!--    状态栏开始    -->
+    <div style="display: flex">
+      <div class="state-div"></div>
+      主叫:
+      <span>{{caller}}</span>
+      <div class="state-div"></div>
+      被叫:
+      <span>{{called}}</span>
+      <div class="state-div"></div>
+      <span>{{agentStateName}}</span>
+      <div class="state-div"></div>
+      <span>{{time}}</span>
+    </div>
+    <!--    状态栏结束    -->
+
+    <!-- This fills the remaining space of the current row -->
+    <span class="example-fill-remaining-space"></span>
+
+    <!--    操作栏开始    -->
+    <div>
+      <button mat-button aria-label="" [disabled]="busyBtnDisabled" (click)="setBusy()">
+        <mat-icon>remove_circle</mat-icon>
+        <span>{{busyBtnName}}</span>
+      </button>
+      <button mat-button aria-label="" [disabled]="keepBtnDisabled" (click)="keep()">
+        <mat-icon>settings_phone</mat-icon>
+        <span>{{keepBtnName}}</span>
+      </button>
+      <button mat-button aria-label="" [disabled]="callOutBtnDisabled" (click)="callOut()">
+        <mat-icon>phone_in_talk</mat-icon>
+        <span>{{callOutBtnName}}</span>
+      </button>
+      <button mat-button aria-label="">
+        <mat-icon>call</mat-icon>
+        <span>软电话</span>
+      </button>
+    </div>
+    <!--    操作栏结束    -->
+
+    <!--    个人信息开始    -->
+    <div>
+      <a mat-button aria-label="">
+        <mat-icon>person</mat-icon>
+        <span>张三</span>
+      </a>
+    </div>
+    <!--    个人信息结束    -->
+  </mat-toolbar-row>
+</mat-toolbar>
