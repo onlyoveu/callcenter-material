@@ -1,4 +1,8 @@
-<mat-drawer-container>
-  <mat-drawer mode="side" opened class="left-container">左侧内容区</mat-drawer>
-  <mat-drawer-content>主内容区</mat-drawer-content>
+<mat-drawer-container class="my-container">
+  <mat-drawer mode="side" opened class="left-container">
+    <app-left-content></app-left-content>
+  </mat-drawer>
+  <mat-drawer-content>
+    <app-main-content></app-main-content>
+  </mat-drawer-content>
 </mat-drawer-container>
