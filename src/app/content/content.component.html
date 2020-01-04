@@ -1,8 +1,37 @@
-<mat-drawer-container class="my-container">
-  <mat-drawer mode="side" opened class="left-container">
-    <app-left-content></app-left-content>
-  </mat-drawer>
-  <mat-drawer-content>
-    <app-main-content></app-main-content>
-  </mat-drawer-content>
-</mat-drawer-container>
+<ng-container>
+  <app-top-bar></app-top-bar>
+  <mat-drawer-container class="my-container">
+    <mat-drawer mode="side" opened class="left-container">
+        <!-- 工具栏导航 -->
+        <div class="tool-bar-div">
+          <!-- routerLink="{{tooBar.routerLink}}" routerLinkActive="active" -->
+          <a mat-icon-button aria-label="" *ngFor="let tooBar of toolBars" (click)="addTab(tooBar.title)">
+            <mat-icon title="{{tooBar.title}}">{{tooBar.iconName}}</mat-icon>
+          </a>
+
+        </div>
+        <!-- 工具栏导航 -->
+    </mat-drawer>
+    <mat-drawer-content>
+      <div class="main-content-div">
+        <mat-tab-group [selectedIndex]="selected"
+                       (selectedIndexChange)="selected = ($event)">
+          <mat-tab *ngFor="let tab of tabs; let index = index" [label]="tab">
+            <ng-template mat-tab-label>
+              {{tab}}
+              <button mat-icon-button
+                      class="example-delete-tab-button"
+                      *ngIf="index !== 0"
+                      [disabled]="tabs.length === 1"
+                      (click)="removeTab(index)">
+                <mat-icon class="tab-icon">close</mat-icon>
+              </button>
+            </ng-template>
+            <app-home-page *ngIf="selected===0"></app-home-page>
+            <app-call-record *ngIf="selected===1"></app-call-record>
+          </mat-tab>
+        </mat-tab-group>
+      </div>
+    </mat-drawer-content>
+  </mat-drawer-container>
+</ng-container>
