@@ -1,0 +1,53 @@
+div{
+  padding-top: 1rem;
+}
+
+.main-div-home-page {
+  display: flex;
+}
+
+.left-div-home-page {
+  width: 72%;
+}
+
+.mid-div-home-page{
+  width: 2%;
+}
+
+.right-div-home-page {
+  width: 26%;
+  float: right;
+}
+
+table {
+  width: 100%;
+  table-layout: fixed;
+}
+/*表格总体样式，不换行，超出宽度省略*/
+td {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#cst-table td{
+  width: 25%;
+}
+
+.phone-table-td{
+  width: 50%;
+}
+
+.mat-paginator-sticky {
+  bottom: 0;
+  position: sticky;
+  z-index: 10;
+}
+
+.num-div-home-page{
+  height: 210px;
+}
+
+mat-form-field{
+  width: 100%;
+}
