@@ -8,13 +8,13 @@
           <a mat-icon-button aria-label="" *ngFor="let tooBar of toolBars" (click)="addTab(tooBar.title)">
             <mat-icon title="{{tooBar.title}}">{{tooBar.iconName}}</mat-icon>
           </a>
-
         </div>
         <!-- 工具栏导航 -->
     </mat-drawer>
     <mat-drawer-content>
       <div class="main-content-div">
-        <mat-tab-group [selectedIndex]="selected"
+        <mat-tab-group
+          [selectedIndex]="selected"
                        (selectedIndexChange)="selected = ($event)">
           <mat-tab *ngFor="let tab of tabs; let index = index" [label]="tab">
             <ng-template mat-tab-label>

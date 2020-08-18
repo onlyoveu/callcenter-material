@@ -1,7 +1,8 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {interval, of, Subscription} from 'rxjs';
 import {delay} from 'rxjs/operators';
+import {PhoneNumService} from '../phone-num.service';
 
 const CALLER = '10016';
 const AGENT_STATE = {
@@ -18,14 +19,19 @@ const AGENT_STATE = {
   templateUrl: './top-bar.component.html',
   styleUrls: ['./top-bar.component.css']
 })
-export class TopBarComponent implements OnInit {
+export class TopBarComponent implements OnInit, OnDestroy {
 
 
-  constructor() {
+  constructor(private phoneNumService: PhoneNumService) {
+    this.phoneNumSubjection = this.phoneNumService.phoneNum$.subscribe(phoneNum => {
+      this.phoneNo.setValue(phoneNum);
+    });
   }
 
-  /* 搜索框手机号 */
-  phoneNo = new FormControl('');
+  phoneNumSubjection: Subscription;
+
+  /* 搜索框手机号表单 */
+  phoneNo: FormControl = new FormControl('');
 
   /* 坐席状态代码 */
   agentStateCode: number;
@@ -80,6 +86,11 @@ export class TopBarComponent implements OnInit {
     );
   }
 
+  ngOnDestroy(): void {
+    /*取消订阅*/
+    this.phoneNumSubjection.unsubscribe();
+  }
+
   updateBusyBtnName(): void {
     if (this.agentStateCode === 1) {
       this.busyBtnName = '置忙';
@@ -102,6 +113,9 @@ export class TopBarComponent implements OnInit {
     this.callOutBtnDisabled = this.agentStateCode !== 1 && this.agentStateCode !== 3;
   }
 
+  /**
+   * 根据号码搜索客户信息
+   */
   private searchPhoneNo() {
     console.log(`searching phone no ${this.phoneNo.value}`);
   }

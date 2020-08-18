@@ -8,8 +8,8 @@ import {
   MatButtonModule,
   MatFormFieldModule,
   MatIconModule,
-  MatInputModule,
-  MatSidenavModule,
+  MatInputModule, MatPaginatorModule, MatSelectModule,
+  MatSidenavModule, MatTableModule,
   MatTabsModule,
   MatToolbarModule
 } from '@angular/material';
@@ -39,6 +39,9 @@ import {CallRecordComponent} from './content/call-record/call-record.component';
     MatInputModule,
     ReactiveFormsModule,
     MatTabsModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatSelectModule,
     // AppRoutingModule
   ],
   providers: [],
