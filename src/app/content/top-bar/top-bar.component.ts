@@ -116,7 +116,7 @@ export class TopBarComponent implements OnInit, OnDestroy {
   /**
    * 根据号码搜索客户信息
    */
-  private searchPhoneNo() {
+  public searchPhoneNo() {
     console.log(`searching phone no ${this.phoneNo.value}`);
   }
 
