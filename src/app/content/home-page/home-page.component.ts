@@ -1,7 +1,8 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {MatPaginator, MatTableDataSource} from '@angular/material';
 import {PhoneNumService} from '../phone-num.service';
 import {FormControl, FormGroup} from '@angular/forms';
+import {MatTableDataSource} from '@angular/material/table';
+import {MatPaginator} from '@angular/material/paginator';
 
 export interface TaskInfo {
   taskId: string;
