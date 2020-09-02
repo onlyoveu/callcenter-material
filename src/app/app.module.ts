@@ -3,9 +3,9 @@ import {NgModule} from '@angular/core';
 
 import {AppComponent} from './app.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {TopBarComponent} from './content/top-bar/top-bar.component';
+import {RegisterDialogComponent, TopBarComponent} from './content/top-bar/top-bar.component';
 import {ContentComponent} from './content/content.component';
-import {ReactiveFormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {HomePageComponent} from './content/home-page/home-page.component';
 import {CallRecordComponent} from './content/call-record/call-record.component';
 import {MatSidenavModule} from '@angular/material/sidenav';
@@ -18,6 +18,7 @@ import {MatTabsModule} from '@angular/material/tabs';
 import {MatTableModule} from '@angular/material/table';
 import {MatPaginatorModule} from '@angular/material/paginator';
 import {MatSelectModule} from '@angular/material/select';
+import {MatDialogModule} from '@angular/material/dialog';
 
 // import { AppRoutingModule } from './app-routing.module';
 
@@ -28,6 +29,7 @@ import {MatSelectModule} from '@angular/material/select';
     ContentComponent,
     HomePageComponent,
     CallRecordComponent,
+    RegisterDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -43,6 +45,8 @@ import {MatSelectModule} from '@angular/material/select';
     MatTableModule,
     MatPaginatorModule,
     MatSelectModule,
+    MatDialogModule,
+    FormsModule,
     // AppRoutingModule
   ],
   providers: [],

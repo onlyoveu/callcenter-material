@@ -1,0 +1,12 @@
+<h1 mat-dialog-title>注册</h1>
+<div mat-dialog-content>
+  <mat-form-field>
+    <label>工号：
+      <input matInput [(ngModel)]="data.workno">
+    </label>
+  </mat-form-field>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="onNoClick()">取消</button>
+  <button mat-button [mat-dialog-close]="data.workno" cdkFocusInitial>注册</button>
+</div>

@@ -59,9 +59,9 @@
 
     <!--    个人信息开始    -->
     <div>
-      <a mat-button aria-label="">
+      <a mat-button aria-label="" (click)="openRegisterDialog()">
         <mat-icon>person</mat-icon>
-        <span>张三</span>
+        <span>{{agentInfo.workno}}</span>
       </a>
     </div>
     <!--    个人信息结束    -->

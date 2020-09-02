@@ -1,8 +1,9 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {interval, of, Subscription} from 'rxjs';
 import {delay} from 'rxjs/operators';
 import {PhoneNumService} from '../phone-num.service';
+import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 
 const CALLER = '10016';
 const AGENT_STATE = {
@@ -14,6 +15,18 @@ const AGENT_STATE = {
   5: '整理'
 };
 
+export interface AgentInfo {
+  // 账号
+  username: string;
+  // 姓名
+  name: string;
+  // 工号
+  workno: string;
+  // 密码
+  pwd: string;
+}
+
+
 @Component({
   selector: 'app-top-bar',
   templateUrl: './top-bar.component.html',
@@ -22,13 +35,20 @@ const AGENT_STATE = {
 export class TopBarComponent implements OnInit, OnDestroy {
 
 
-  constructor(private phoneNumService: PhoneNumService) {
+  constructor(private phoneNumService: PhoneNumService, public dialog: MatDialog) {
     this.phoneNumSubjection = this.phoneNumService.phoneNum$.subscribe(phoneNum => {
       this.phoneNo.setValue(phoneNum);
     });
   }
 
   phoneNumSubjection: Subscription;
+
+  agentInfo: AgentInfo = {
+    username: '',
+    name: '',
+    workno: '',
+    pwd: ''
+  };
 
   /* 搜索框手机号表单 */
   phoneNo: FormControl = new FormControl('');
@@ -215,5 +235,35 @@ export class TopBarComponent implements OnInit, OnDestroy {
       this.updateStateCodeAndName(4);
       this.keepBtnName = '恢复';
     }
+  }
+
+  /* 注册 */
+  openRegisterDialog(): void {
+    const matDialogRef = this.dialog.open(RegisterDialogComponent, {
+      width: '250px',
+      data: {
+        workno: '10002',
+        pwd: '1234'
+      }
+    });
+    matDialogRef.afterClosed().subscribe(result => {
+      console.log(`register ${result}`);
+      this.agentInfo.workno = result;
+    });
+  }
+}
+
+@Component({
+  selector: 'app-register-dialog',
+  templateUrl: './register-dialog.component.html'
+})
+export class RegisterDialogComponent {
+  constructor(
+    public dialogRef: MatDialogRef<RegisterDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: AgentInfo) {
+  }
+
+  onNoClick(): void {
+    this.dialogRef.close();
   }
 }
