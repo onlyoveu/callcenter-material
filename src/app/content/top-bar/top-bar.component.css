@@ -22,3 +22,7 @@
 .state-div{
   min-width: 10px;
 }
+
+.example-full-width {
+  width: 100%;
+}

@@ -1,12 +1,16 @@
 <h1 mat-dialog-title>注册</h1>
 <div mat-dialog-content>
-  <mat-form-field>
-    <label>工号：
-      <input matInput [(ngModel)]="data.workno">
-    </label>
+  <mat-form-field class="example-full-width">
+    <input matInput [(ngModel)]="data.wssServer" placeholder="wss服务器地址">
+  </mat-form-field>
+  <mat-form-field class="example-full-width">
+    <input matInput [(ngModel)]="data.workno" placeholder="工号">
+  </mat-form-field>
+  <mat-form-field class="example-full-width">
+    <input matInput [(ngModel)]="data.pwd" placeholder="密码">
   </mat-form-field>
 </div>
 <div mat-dialog-actions align="end">
   <button mat-button (click)="onNoClick()">取消</button>
-  <button mat-button [mat-dialog-close]="data.workno" cdkFocusInitial>注册</button>
+  <button mat-button [mat-dialog-close]="data" cdkFocusInitial>注册</button>
 </div>

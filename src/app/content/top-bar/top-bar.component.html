@@ -33,6 +33,9 @@
     </div>
     <!--    状态栏结束    -->
 
+    <audio id="remoteAudio" preload="auto" controls>
+    </audio>
+
     <!-- This fills the remaining space of the current row -->
     <span class="example-fill-remaining-space"></span>
 
@@ -49,6 +52,10 @@
       <button mat-button aria-label="" [disabled]="callOutBtnDisabled" (click)="callOut()">
         <mat-icon>phone_in_talk</mat-icon>
         <span>{{callOutBtnName}}</span>
+      </button>
+      <button mat-button aria-label="" (click)="answerCall()">
+        <mat-icon>phone_in_talk</mat-icon>
+        <span>应答</span>
       </button>
       <button mat-button aria-label="">
         <mat-icon>call</mat-icon>
