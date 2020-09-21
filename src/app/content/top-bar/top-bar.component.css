@@ -27,6 +27,14 @@
   width: 100%;
 }
 
-.dtmf-div{
-  margin-top: 6em;
+.dialpad{
+  position: fixed;
+  z-index: 1000;
+  right: 0.5em;
+  top: 3em;
+  font: caption;
+}
+
+.keypad{
+  width: 2em;
 }

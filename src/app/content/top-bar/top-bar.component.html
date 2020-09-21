@@ -2,9 +2,9 @@
   <mat-toolbar-row class="top-bar-row">
 
     <!-- logo -->
-<!--    <a mat-icon-button aria-label="">-->
-<!--      <mat-icon title="工作台">headset_mic</mat-icon>-->
-<!--    </a>-->
+    <!--    <a mat-icon-button aria-label="">-->
+    <!--      <mat-icon title="工作台">headset_mic</mat-icon>-->
+    <!--    </a>-->
     <!-- logo -->
 
     <!--    搜索框开始    -->
@@ -45,21 +45,21 @@
         <mat-icon>remove_circle</mat-icon>
         <span>{{busyBtnName}}</span>
       </button>
-      <button mat-button aria-label="" [disabled]="keepBtnDisabled" (click)="keep()">
-        <mat-icon>settings_phone</mat-icon>
-        <span>{{keepBtnName}}</span>
-      </button>
       <button mat-button aria-label="" [disabled]="callOutBtnDisabled" (click)="callOut()">
-        <mat-icon>phone_in_talk</mat-icon>
+        <mat-icon>call</mat-icon>
         <span>{{callOutBtnName}}</span>
       </button>
       <button mat-button aria-label="" (click)="answerCall()">
         <mat-icon>phone_in_talk</mat-icon>
         <span>应答</span>
       </button>
-      <button mat-button aria-label="">
-        <mat-icon>call</mat-icon>
-        <span>软电话</span>
+      <button mat-button aria-label="" (click)="answerCall()">
+        <mat-icon>mic_off</mat-icon>
+        <span>静音</span>
+      </button>
+      <button mat-button aria-label="" [disabled]="keepBtnDisabled" (click)="keep()">
+        <mat-icon>settings_phone</mat-icon>
+        <span>{{keepBtnName}}</span>
       </button>
     </div>
     <!--    操作栏结束    -->
@@ -72,27 +72,36 @@
       </a>
     </div>
     <!--    个人信息结束    -->
+
+    <!-- dialpad 开始-->
+    <button mat-button aria-label="" (click)="showDialpad()">
+      <mat-icon>dialpad</mat-icon>
+    </button>
+    <!-- dialpad 结束-->
+
     <!-- DTMF 开始 -->
-    <div class="dtmf-div">
-      <div>
-        <button class="keypad">1</button>
-        <button class="keypad">2</button>
-        <button class="keypad">3</button>
-      </div>
-      <div>
-        <button class="keypad">4</button>
-        <button class="keypad">5</button>
-        <button class="keypad">6</button>
-      </div>
-      <div>
-        <button class="keypad">7</button>
-        <button class="keypad">8</button>
-        <button class="keypad">9</button>
-      </div>
-      <div>
-        <button class="keypad">*</button>
-        <button class="keypad">0</button>
-        <button class="keypad">#</button>
+    <div class="dialpad">
+      <div [hidden]="dialpadHidden">
+        <div>
+          <button class="keypad">1</button>
+          <button class="keypad">2</button>
+          <button class="keypad">3</button>
+        </div>
+        <div>
+          <button class="keypad">4</button>
+          <button class="keypad">5</button>
+          <button class="keypad">6</button>
+        </div>
+        <div>
+          <button class="keypad">7</button>
+          <button class="keypad">8</button>
+          <button class="keypad">9</button>
+        </div>
+        <div>
+          <button class="keypad">*</button>
+          <button class="keypad">0</button>
+          <button class="keypad">#</button>
+        </div>
       </div>
     </div>
     <!-- DTMF 结束 -->

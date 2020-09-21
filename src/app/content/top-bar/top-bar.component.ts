@@ -7,7 +7,10 @@ import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog
 import {SimpleUser, SimpleUserDelegate, SimpleUserOptions} from 'sip.js/lib/platform/web';
 import {UserAgent} from 'sip.js';
 
-const CALLER = '10016';
+/* 默认主叫 */
+const CALLER = '1234';
+
+/* 坐席状态 */
 const AGENT_STATE = {
   offline: {
     val: 0,
@@ -33,6 +36,27 @@ const AGENT_STATE = {
   }
 };
 
+/* 按钮名称 */
+const BTN_NAME = {
+  busyBtnName: {
+    setBusy: '置忙',
+    setFree: '置闲'
+  },
+  keepBtnName: {
+    setKeeping: '保持',
+    setUnKeeping: '恢复'
+  },
+  callOutBtnName: {
+    setCallOut: '呼出',
+    setHangUp: '挂断'
+  },
+  muteBtnName: {
+    setMute: '静音',
+    setHangUp: '挂断'
+  }
+};
+
+/* 坐席信息 */
 export interface AgentInfo {
   // wss服务器地址
   wssServer: string;
@@ -120,6 +144,8 @@ export class TopBarComponent implements OnInit, OnDestroy {
   callOutBtnName = '外拨';
   /* 外拨按钮禁用 */
   callOutBtnDisabled = false;
+  /* dtmf 隐藏显示*/
+  dialpadHidden = true;
 
   /* 计时器 */
   time: string;
@@ -159,11 +185,21 @@ export class TopBarComponent implements OnInit, OnDestroy {
     this.phoneNumSubjection.unsubscribe();
   }
 
+  /* 更新置闲置忙按钮 */
   updateBusyBtnName(): void {
     if (this.agentStateCode === AGENT_STATE.free.val) {
       this.busyBtnName = '置忙';
     } else if (this.agentStateCode === AGENT_STATE.busy.val || this.agentStateCode === AGENT_STATE.making.val) {
       this.busyBtnName = '置闲';
+    }
+  }
+
+  /* 更新呼出按钮 */
+  updateCallOuntBtnName(): void {
+    if (this.agentStateCode === AGENT_STATE.talking.val) {
+      this.busyBtnName = '挂机';
+    } else if (this.agentStateCode === AGENT_STATE.busy.val || this.agentStateCode === AGENT_STATE.making.val) {
+      this.busyBtnName = '呼叫';
     }
   }
 
@@ -291,12 +327,24 @@ export class TopBarComponent implements OnInit, OnDestroy {
 
   /* 保持 */
   keep() {
-    if (this.agentStateCode === 4) {
-      this.updateStateCodeAndName(3);
-      this.keepBtnName = '保持';
+    if (this.agentStateCode === AGENT_STATE.keeping.val) {
+      this.simpleUser.unhold()
+        .then(() => {
+          this.updateStateCodeAndName(AGENT_STATE.talking.val);
+          this.keepBtnName = '保持';
+        })
+        .catch((error: Error) => {
+          console.error(`[${this.simpleUser.id}] failed to hold call`);
+        });
     } else {
-      this.updateStateCodeAndName(4);
-      this.keepBtnName = '恢复';
+      this.simpleUser.hold()
+        .then(() => {
+          this.updateStateCodeAndName(AGENT_STATE.keeping.val);
+          this.keepBtnName = '恢复';
+        })
+        .catch((error: Error) => {
+          console.error(`[${this.simpleUser.id}] failed to hold call`);
+        });
     }
   }
 
@@ -390,18 +438,20 @@ export class TopBarComponent implements OnInit, OnDestroy {
 
   /* 发送DTMF */
   sendDtmf(): void {
-    console.log('init send dtmf success!');
-    const keypad = this.getButtons('keypad');
-    keypad.forEach((button) => {
-      button.addEventListener('click', () => {
-        const tone = button.textContent;
-        if (tone) {
-          this.simpleUser.sendDTMF(tone).then(() => {
-            console.log(`send dtmf=${tone}`);
-          });
-        }
+    if (this.simpleUser) {
+      console.log('init send dtmf success!');
+      const keypad = this.getButtons('keypad');
+      keypad.forEach((button) => {
+        button.addEventListener('click', () => {
+          const tone = button.textContent;
+          if (tone) {
+            this.simpleUser.sendDTMF(tone).then(() => {
+              console.log(`send dtmf=${tone}`);
+            });
+          }
+        });
       });
-    });
+    }
   }
 
   /* 挂机 */
@@ -437,6 +487,11 @@ export class TopBarComponent implements OnInit, OnDestroy {
       buttons.push(el);
     }
     return buttons;
+  }
+
+  /* 显示隐藏拨号面板 */
+  showDialpad() {
+    this.dialpadHidden = !this.dialpadHidden;
   }
 }
 

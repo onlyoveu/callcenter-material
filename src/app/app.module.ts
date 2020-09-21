@@ -19,6 +19,7 @@ import {MatTableModule} from '@angular/material/table';
 import {MatPaginatorModule} from '@angular/material/paginator';
 import {MatSelectModule} from '@angular/material/select';
 import {MatDialogModule} from '@angular/material/dialog';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 
 // import { AppRoutingModule } from './app-routing.module';
 
@@ -31,24 +32,25 @@ import {MatDialogModule} from '@angular/material/dialog';
     CallRecordComponent,
     RegisterDialogComponent
   ],
-  imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
-    MatSidenavModule,
-    MatToolbarModule,
-    MatIconModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatInputModule,
-    ReactiveFormsModule,
-    MatTabsModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatSelectModule,
-    MatDialogModule,
-    FormsModule,
-    // AppRoutingModule
-  ],
+    imports: [
+        BrowserModule,
+        BrowserAnimationsModule,
+        MatSidenavModule,
+        MatToolbarModule,
+        MatIconModule,
+        MatButtonModule,
+        MatFormFieldModule,
+        MatInputModule,
+        ReactiveFormsModule,
+        MatTabsModule,
+        MatTableModule,
+        MatPaginatorModule,
+        MatSelectModule,
+        MatDialogModule,
+        FormsModule,
+        MatCheckboxModule,
+        // AppRoutingModule
+    ],
   providers: [],
   entryComponents: [HomePageComponent, CallRecordComponent],
   bootstrap: [AppComponent]
