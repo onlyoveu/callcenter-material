@@ -9,12 +9,28 @@ import {UserAgent} from 'sip.js';
 
 const CALLER = '10016';
 const AGENT_STATE = {
-  0: '离线',
-  1: '空闲',
-  2: '忙碌',
-  3: '通话',
-  4: '保持',
-  5: '整理'
+  offline: {
+    val: 0,
+    des: '离线'
+  }, free: {
+    val: 1,
+    des: '空闲'
+  }, busy: {
+    val: 2,
+    des: '忙碌'
+  }, talking: {
+    val: 3,
+    des: '通话'
+  }, keeping: {
+    val: 4,
+    des: '保持'
+  }, making: {
+    val: 5,
+    des: '整理'
+  }, mute: {
+    val: 6,
+    des: '静音'
+  }
 };
 
 export interface AgentInfo {
@@ -60,18 +76,19 @@ export class TopBarComponent implements OnInit, OnDestroy {
   simpleUserDelegate: SimpleUserDelegate = {
     onCallCreated: (): void => {
       console.log(`[${this.agentInfo.workno}] Call created`);
-
     },
     onCallAnswered: (): void => {
       console.log(`[${this.agentInfo.workno}] Call answered`);
-
+      this.callIn();
     },
     onCallHangup: (): void => {
       console.log(`[${this.agentInfo.workno}] Call hangup`);
+      this.updateStateCodeAndName(AGENT_STATE.busy.val);
 
     },
     onCallHold: (held: boolean): void => {
       console.log(`[${this.agentInfo.workno}] Call hold ${held}`);
+      this.updateStateCodeAndName(AGENT_STATE.keeping.val);
 
     },
     onCallReceived: (): void => {
@@ -134,6 +151,7 @@ export class TopBarComponent implements OnInit, OnDestroy {
         this.updateStateCodeAndName(1);
       }
     );
+    this.sendDtmf();
   }
 
   ngOnDestroy(): void {
@@ -142,9 +160,9 @@ export class TopBarComponent implements OnInit, OnDestroy {
   }
 
   updateBusyBtnName(): void {
-    if (this.agentStateCode === 1) {
+    if (this.agentStateCode === AGENT_STATE.free.val) {
       this.busyBtnName = '置忙';
-    } else if (this.agentStateCode === 2 || this.agentStateCode === 5) {
+    } else if (this.agentStateCode === AGENT_STATE.busy.val || this.agentStateCode === AGENT_STATE.making.val) {
       this.busyBtnName = '置闲';
     }
   }
@@ -158,9 +176,9 @@ export class TopBarComponent implements OnInit, OnDestroy {
     this.agentStateName = AGENT_STATE[this.agentStateCode];
     this.updateBusyBtnName();
     this.updateTime();
-    this.busyBtnDisabled = this.agentStateCode === 3 || this.agentStateCode === 4;
-    this.keepBtnDisabled = this.agentStateCode !== 3 && this.agentStateCode !== 4;
-    this.callOutBtnDisabled = this.agentStateCode !== 1 && this.agentStateCode !== 3;
+    this.busyBtnDisabled = this.agentStateCode === AGENT_STATE.talking.val || this.agentStateCode === AGENT_STATE.keeping.val;
+    this.keepBtnDisabled = this.agentStateCode !== AGENT_STATE.talking.val && this.agentStateCode !== AGENT_STATE.keeping.val;
+    this.callOutBtnDisabled = this.agentStateCode !== AGENT_STATE.free.val && this.agentStateCode !== AGENT_STATE.talking.val;
   }
 
   /**
@@ -170,6 +188,7 @@ export class TopBarComponent implements OnInit, OnDestroy {
     console.log(`searching phone no ${this.phoneNo.value}`);
   }
 
+  /* 更新时间 */
   private updateTime() {
     this.clearTime();
     this.setTimeStart();
@@ -234,7 +253,7 @@ export class TopBarComponent implements OnInit, OnDestroy {
 
   /* 呼出 */
   callOut() {
-    if (this.agentStateCode === 1) {
+    if (this.agentStateCode === AGENT_STATE.free.val) {
       /*设置主被叫*/
       this.caller = CALLER;
       this.called = this.phoneNo.value;
@@ -244,17 +263,30 @@ export class TopBarComponent implements OnInit, OnDestroy {
       /*设置外拨按钮*/
       this.callOutBtnName = '挂机';
       this.makeCall();
-    } else if (this.agentStateCode === 3) {
+    } else if (this.agentStateCode === AGENT_STATE.talking.val) {
       /*设置主被叫*/
       this.caller = '';
       this.called = '';
       console.log(`hang up call ${this.phoneNo.value}`);
       /*设置状态*/
-      this.updateStateCodeAndName(5);
+      this.updateStateCodeAndName(AGENT_STATE.making.val);
       /*设置外拨按钮*/
       this.callOutBtnName = '外拨';
       this.hangupCall();
     }
+  }
+
+
+  /* 呼入 */
+  callIn() {
+    /*设置主被叫*/
+    this.caller = this.simpleUser.id;
+    this.called = this.agentInfo.workno;
+    console.log(`call out ${this.phoneNo.value}`);
+    /*设置状态*/
+    this.updateStateCodeAndName(AGENT_STATE.talking.val);
+    /*设置外拨按钮*/
+    this.callOutBtnName = '挂机';
   }
 
   /* 保持 */
@@ -328,8 +360,10 @@ export class TopBarComponent implements OnInit, OnDestroy {
     });
   }
 
+  /* 外呼 */
   makeCall(): void {
-    this.simpleUser.call(this.phoneNo.value)
+    const uri = 'sip:' + this.phoneNo.value + '@' + this.agentInfo.wssServer.replace('wss://', '');
+    this.simpleUser.call(uri)
       .then(() => {
         console.log(`[${this.simpleUser.id}] success to place call`);
       })
@@ -340,6 +374,7 @@ export class TopBarComponent implements OnInit, OnDestroy {
       });
   }
 
+  /* 应答 */
   answerCall(): void {
     this.simpleUser
       .answer()
@@ -353,6 +388,23 @@ export class TopBarComponent implements OnInit, OnDestroy {
       });
   }
 
+  /* 发送DTMF */
+  sendDtmf(): void {
+    console.log('init send dtmf success!');
+    const keypad = this.getButtons('keypad');
+    keypad.forEach((button) => {
+      button.addEventListener('click', () => {
+        const tone = button.textContent;
+        if (tone) {
+          this.simpleUser.sendDTMF(tone).then(() => {
+            console.log(`send dtmf=${tone}`);
+          });
+        }
+      });
+    });
+  }
+
+  /* 挂机 */
   hangupCall(): void {
     this.simpleUser.hangup().catch((error: Error) => {
       console.error(`[${this.simpleUser.id}] failed to hangup call`);
@@ -361,6 +413,7 @@ export class TopBarComponent implements OnInit, OnDestroy {
     });
   }
 
+  /* 取音频播放器 */
   getAudio(id: string): HTMLAudioElement {
     const el = document.getElementById(id);
     if (!(el instanceof HTMLAudioElement)) {
@@ -368,8 +421,28 @@ export class TopBarComponent implements OnInit, OnDestroy {
     }
     return el;
   }
+
+  /* 取button */
+  getButtons(id: string): Array<HTMLButtonElement> {
+    const els = document.getElementsByClassName(id);
+    if (!els.length) {
+      throw new Error(`Elements "${id}" not found.`);
+    }
+    const buttons: Array<HTMLButtonElement> = [];
+    for (let i = 0; i < els.length; i++) {
+      const el = els[i];
+      if (!(el instanceof HTMLButtonElement)) {
+        throw new Error(`Element ${i} of "${id}" not a button element.`);
+      }
+      buttons.push(el);
+    }
+    return buttons;
+  }
 }
 
+/**
+ * 注册对话框
+ */
 @Component({
   selector: 'app-register-dialog',
   templateUrl: './register-dialog.component.html',
