@@ -38,3 +38,8 @@
 .keypad{
   width: 2em;
 }
+
+.info-div{
+  display: flex;
+  font-size: small;
+}

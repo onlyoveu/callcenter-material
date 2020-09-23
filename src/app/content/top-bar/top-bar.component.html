@@ -19,7 +19,7 @@
     <!--    搜索框结束    -->
 
     <!--    状态栏开始    -->
-    <div style="display: flex">
+    <div class="info-div">
       <div class="state-div"></div>
       主叫:
       <span>{{caller}}</span>
@@ -27,39 +27,40 @@
       被叫:
       <span>{{called}}</span>
       <div class="state-div"></div>
-      <span>{{agentStateName}}</span>
+      <span>[{{agentStateName}}]</span>
       <div class="state-div"></div>
       <span>{{time}}</span>
     </div>
     <!--    状态栏结束    -->
 
-    <audio id="remoteAudio" preload="auto" controls>
-    </audio>
+    <!-- 音频 audio 开始-->
+    <audio id="remoteAudio" preload="auto" controls hidden></audio>
+    <!-- 音频 audio 结束-->
 
     <!-- This fills the remaining space of the current row -->
     <span class="example-fill-remaining-space"></span>
 
     <!--    操作栏开始    -->
     <div>
-      <button mat-button aria-label="" [disabled]="busyBtnDisabled" (click)="setBusy()">
+      <button mat-button aria-label="" [disabled]="busyBtn.disabled" (click)="setBusy()">
         <mat-icon>remove_circle</mat-icon>
-        <span>{{busyBtnName}}</span>
+        <span>{{busyBtn.name}}</span>
       </button>
-      <button mat-button aria-label="" [disabled]="callOutBtnDisabled" (click)="callOut()">
+      <button mat-button aria-label="" [disabled]="callBtn.disabled" (click)="callOut()">
         <mat-icon>call</mat-icon>
-        <span>{{callOutBtnName}}</span>
+        <span>{{callBtn.name}}</span>
       </button>
-      <button mat-button aria-label="" (click)="answerCall()">
+      <button mat-button aria-label="" [disabled]="answerBtn.disabled" (click)="answerCall()">
         <mat-icon>phone_in_talk</mat-icon>
-        <span>应答</span>
+        <span>{{answerBtn.name}}</span>
       </button>
-      <button mat-button aria-label="" (click)="answerCall()">
+      <button mat-button aria-label="" [disabled]="muteBtn.disabled" (click)="mute()">
         <mat-icon>mic_off</mat-icon>
-        <span>静音</span>
+        <span>{{muteBtn.name}}</span>
       </button>
-      <button mat-button aria-label="" [disabled]="keepBtnDisabled" (click)="keep()">
+      <button mat-button aria-label="" [disabled]="holdBtn.disabled" (click)="hold()">
         <mat-icon>settings_phone</mat-icon>
-        <span>{{keepBtnName}}</span>
+        <span>{{holdBtn.name}}</span>
       </button>
     </div>
     <!--    操作栏结束    -->

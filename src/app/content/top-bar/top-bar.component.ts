@@ -7,55 +7,6 @@ import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog
 import {SimpleUser, SimpleUserDelegate, SimpleUserOptions} from 'sip.js/lib/platform/web';
 import {UserAgent} from 'sip.js';
 
-/* 默认主叫 */
-const CALLER = '1234';
-
-/* 坐席状态 */
-const AGENT_STATE = {
-  offline: {
-    val: 0,
-    des: '离线'
-  }, free: {
-    val: 1,
-    des: '空闲'
-  }, busy: {
-    val: 2,
-    des: '忙碌'
-  }, talking: {
-    val: 3,
-    des: '通话'
-  }, keeping: {
-    val: 4,
-    des: '保持'
-  }, making: {
-    val: 5,
-    des: '整理'
-  }, mute: {
-    val: 6,
-    des: '静音'
-  }
-};
-
-/* 按钮名称 */
-const BTN_NAME = {
-  busyBtnName: {
-    setBusy: '置忙',
-    setFree: '置闲'
-  },
-  keepBtnName: {
-    setKeeping: '保持',
-    setUnKeeping: '恢复'
-  },
-  callOutBtnName: {
-    setCallOut: '呼出',
-    setHangUp: '挂断'
-  },
-  muteBtnName: {
-    setMute: '静音',
-    setHangUp: '挂断'
-  }
-};
-
 /* 坐席信息 */
 export interface AgentInfo {
   // wss服务器地址
@@ -70,13 +21,92 @@ export interface AgentInfo {
   pwd: string;
 }
 
+/**
+ * 按钮信息
+ */
+export interface BtnInfo {
+  // 按钮名称
+  name: string;
+  // 按钮状态
+  disabled: boolean;
+}
+
+/* 默认主叫 */
+const CALLER = '1234';
+
+/* 坐席状态 */
+const AGENT_STATE = {
+  offline: {
+    val: 0,
+    des: '离线',
+    name: 'offline'
+  },
+  busy: {
+    val: 1,
+    des: '忙碌',
+    name: 'busy'
+  },
+  free: {
+    val: 2,
+    des: '空闲',
+    name: 'free'
+  },
+  ring: {
+    val: 3,
+    des: '响铃',
+    name: 'ring'
+  },
+  talking: {
+    val: 4,
+    des: '通话',
+    name: 'talking'
+  },
+  mute: {
+    val: 5,
+    des: '静音',
+    name: 'mute'
+  },
+  holding: {
+    val: 6,
+    des: '保持',
+    name: 'holding'
+  },
+  making: {
+    val: 7,
+    des: '整理',
+    name: 'making'
+  }
+};
+
+/* 按钮名称 */
+const BTN_NAME = {
+  busyBtnName: {
+    busy: '置忙',
+    free: '置闲'
+  },
+  callOutBtnName: {
+    callOut: '呼出',
+    hangUp: '挂断'
+  },
+  answerBtnName: {
+    answer: '应答'
+  },
+  holdBtnName: {
+    holding: '保持',
+    unHolding: '恢复'
+  },
+  muteBtnName: {
+    mute: '静音',
+    unmute: '解除'
+  }
+};
+
 @Component({
   selector: 'app-top-bar',
   templateUrl: './top-bar.component.html',
   styleUrls: ['./top-bar.component.css']
 })
 export class TopBarComponent implements OnInit, OnDestroy {
-
 
   constructor(private phoneNumService: PhoneNumService, public dialog: MatDialog) {
     this.phoneNumSubjection = this.phoneNumService.phoneNum$.subscribe(phoneNum => {
@@ -94,8 +124,10 @@ export class TopBarComponent implements OnInit, OnDestroy {
     workno: '',
     pwd: ''
   };
+
   /* user agent */
   simpleUser: SimpleUser;
+
   // SimpleUser delegate
   simpleUserDelegate: SimpleUserDelegate = {
     onCallCreated: (): void => {
@@ -103,21 +135,19 @@ export class TopBarComponent implements OnInit, OnDestroy {
     },
     onCallAnswered: (): void => {
       console.log(`[${this.agentInfo.workno}] Call answered`);
-      this.callIn();
     },
     onCallHangup: (): void => {
       console.log(`[${this.agentInfo.workno}] Call hangup`);
-      this.updateStateCodeAndName(AGENT_STATE.busy.val);
+      this.updateStateCodeAndName(AGENT_STATE.busy.name);
 
     },
     onCallHold: (held: boolean): void => {
       console.log(`[${this.agentInfo.workno}] Call hold ${held}`);
-      this.updateStateCodeAndName(AGENT_STATE.keeping.val);
-
     },
     onCallReceived: (): void => {
       console.log(`[${this.agentInfo.workno}] received Call`);
-      this.answerCall();
+      this.updateStateCodeAndName(AGENT_STATE.ring.name);
+      this.ringAudio.play();
     }
   };
 
@@ -130,20 +160,42 @@ export class TopBarComponent implements OnInit, OnDestroy {
   /* 坐席状态名称 */
   agentStateName: string;
 
-  /* 置闲置忙按钮名称 */
-  busyBtnName: string;
-  /* 置闲置忙按钮禁用 */
-  busyBtnDisabled = false;
+  /**
+   * 置闲置忙按钮
+   */
+  busyBtn: BtnInfo = {
+    name: BTN_NAME.busyBtnName.free,
+    disabled: true
+  };
+  /**
+   * 呼出按钮
+   */
+  callBtn: BtnInfo = {
+    name: BTN_NAME.callOutBtnName.callOut,
+    disabled: true
+  };
+  /**
+   * 应答按钮
+   */
+  answerBtn: BtnInfo = {
+    name: BTN_NAME.answerBtnName.answer,
+    disabled: true
+  };
+  /**
+   * 静音按钮
+   */
+  muteBtn: BtnInfo = {
+    name: BTN_NAME.muteBtnName.mute,
+    disabled: true
+  };
+  /**
+   * 保持按钮
+   */
+  holdBtn: BtnInfo = {
+    name: BTN_NAME.holdBtnName.holding,
+    disabled: true
+  };
 
-  /* 保持按钮名称 */
-  keepBtnName = '保持';
-  /* 保持按钮禁用 */
-  keepBtnDisabled = false;
-
-  /* 外拨按钮名称 */
-  callOutBtnName = '外拨';
-  /* 外拨按钮禁用 */
-  callOutBtnDisabled = false;
   /* dtmf 隐藏显示*/
   dialpadHidden = true;
 
@@ -156,6 +208,9 @@ export class TopBarComponent implements OnInit, OnDestroy {
   caller: string;
   called: string;
 
+  /* 铃声 */
+  ringAudio = new Audio('assets/ring.mp3');
+
   /**
    * 格式化时间
    */
@@ -165,18 +220,9 @@ export class TopBarComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     console.log('agent sign in auto...');
-    // 刚签入时自动置忙
-    this.updateStateCodeAndName(2);
-    // 5秒后自动置闲
-    of(null).pipe(delay(5000)).subscribe(
-      x => {
-      },
-      err => {
-      },
-      () => {
-        this.updateStateCodeAndName(1);
-      }
-    );
+    // 初始化坐席状态为0
+    this.updateStateCodeAndName(AGENT_STATE.offline.name);
+    // 初始化小键盘
     this.sendDtmf();
   }
 
@@ -185,36 +231,224 @@ export class TopBarComponent implements OnInit, OnDestroy {
     this.phoneNumSubjection.unsubscribe();
   }
 
-  /* 更新置闲置忙按钮 */
-  updateBusyBtnName(): void {
-    if (this.agentStateCode === AGENT_STATE.free.val) {
-      this.busyBtnName = '置忙';
-    } else if (this.agentStateCode === AGENT_STATE.busy.val || this.agentStateCode === AGENT_STATE.making.val) {
-      this.busyBtnName = '置闲';
+  /**
+   * 更新按钮
+   */
+  updateBtn() {
+    switch (this.agentStateCode) {
+      case AGENT_STATE.offline.val:
+        this.busyBtn.name = BTN_NAME.busyBtnName.free;
+        this.busyBtn.disabled = true;
+
+        this.callBtn.name = BTN_NAME.callOutBtnName.callOut;
+        this.callBtn.disabled = true;
+
+        this.answerBtn.name = BTN_NAME.answerBtnName.answer;
+        this.answerBtn.disabled = true;
+
+        this.muteBtn.name = BTN_NAME.muteBtnName.mute;
+        this.muteBtn.disabled = true;
+
+        this.holdBtn.name = BTN_NAME.holdBtnName.holding;
+        this.holdBtn.disabled = true;
+        break;
+      case AGENT_STATE.busy.val:
+        this.busyBtn.name = BTN_NAME.busyBtnName.free;
+        this.busyBtn.disabled = false;
+
+        this.callBtn.name = BTN_NAME.callOutBtnName.callOut;
+        this.callBtn.disabled = true;
+
+        this.answerBtn.name = BTN_NAME.answerBtnName.answer;
+        this.answerBtn.disabled = true;
+
+        this.muteBtn.name = BTN_NAME.muteBtnName.mute;
+        this.muteBtn.disabled = true;
+
+        this.holdBtn.name = BTN_NAME.holdBtnName.holding;
+        this.holdBtn.disabled = true;
+        break;
+      case AGENT_STATE.free.val:
+        this.busyBtn.name = BTN_NAME.busyBtnName.busy;
+        this.busyBtn.disabled = false;
+
+        this.callBtn.name = BTN_NAME.callOutBtnName.callOut;
+        this.callBtn.disabled = false;
+
+        this.answerBtn.name = BTN_NAME.answerBtnName.answer;
+        this.answerBtn.disabled = true;
+
+        this.muteBtn.name = BTN_NAME.muteBtnName.mute;
+        this.muteBtn.disabled = true;
+
+        this.holdBtn.name = BTN_NAME.holdBtnName.holding;
+        this.holdBtn.disabled = true;
+        break;
+      case AGENT_STATE.ring.val:
+        this.busyBtn.name = BTN_NAME.busyBtnName.busy;
+        this.busyBtn.disabled = true;
+
+        this.callBtn.name = BTN_NAME.callOutBtnName.callOut;
+        this.callBtn.disabled = true;
+
+        this.answerBtn.name = BTN_NAME.answerBtnName.answer;
+        this.answerBtn.disabled = false;
+
+        this.muteBtn.name = BTN_NAME.muteBtnName.mute;
+        this.muteBtn.disabled = true;
+
+        this.holdBtn.name = BTN_NAME.holdBtnName.holding;
+        this.holdBtn.disabled = true;
+        break;
+      case AGENT_STATE.talking.val:
+        this.busyBtn.name = BTN_NAME.busyBtnName.free;
+        this.busyBtn.disabled = true;
+
+        this.callBtn.name = BTN_NAME.callOutBtnName.hangUp;
+        this.callBtn.disabled = false;
+
+        this.answerBtn.name = BTN_NAME.answerBtnName.answer;
+        this.answerBtn.disabled = true;
+
+        this.muteBtn.name = BTN_NAME.muteBtnName.mute;
+        this.muteBtn.disabled = false;
+
+        this.holdBtn.name = BTN_NAME.holdBtnName.holding;
+        this.holdBtn.disabled = false;
+        break;
+      case AGENT_STATE.mute.val:
+        this.busyBtn.name = BTN_NAME.busyBtnName.free;
+        this.busyBtn.disabled = true;
+
+        this.callBtn.name = BTN_NAME.callOutBtnName.hangUp;
+        this.callBtn.disabled = true;
+
+        this.answerBtn.name = BTN_NAME.answerBtnName.answer;
+        this.answerBtn.disabled = true;
+
+        this.muteBtn.name = BTN_NAME.muteBtnName.unmute;
+        this.muteBtn.disabled = false;
+
+        this.holdBtn.name = BTN_NAME.holdBtnName.holding;
+        this.holdBtn.disabled = true;
+        break;
+      case AGENT_STATE.holding.val:
+        this.busyBtn.name = BTN_NAME.busyBtnName.free;
+        this.busyBtn.disabled = true;
+
+        this.callBtn.name = BTN_NAME.callOutBtnName.hangUp;
+        this.callBtn.disabled = true;
+
+        this.answerBtn.name = BTN_NAME.answerBtnName.answer;
+        this.answerBtn.disabled = true;
+
+        this.muteBtn.name = BTN_NAME.muteBtnName.mute;
+        this.muteBtn.disabled = true;
+
+        this.holdBtn.name = BTN_NAME.holdBtnName.unHolding;
+        this.holdBtn.disabled = false;
+        break;
+      case AGENT_STATE.making.val:
+        this.busyBtn.name = BTN_NAME.busyBtnName.free;
+        this.busyBtn.disabled = false;
+
+        this.callBtn.name = BTN_NAME.callOutBtnName.callOut;
+        this.callBtn.disabled = true;
+
+        this.answerBtn.name = BTN_NAME.answerBtnName.answer;
+        this.answerBtn.disabled = true;
+
+        this.muteBtn.name = BTN_NAME.muteBtnName.mute;
+        this.muteBtn.disabled = true;
+
+        this.holdBtn.name = BTN_NAME.holdBtnName.holding;
+        this.holdBtn.disabled = true;
+        break;
     }
   }
 
-  /* 更新呼出按钮 */
-  updateCallOuntBtnName(): void {
-    if (this.agentStateCode === AGENT_STATE.talking.val) {
-      this.busyBtnName = '挂机';
-    } else if (this.agentStateCode === AGENT_STATE.busy.val || this.agentStateCode === AGENT_STATE.making.val) {
-      this.busyBtnName = '呼叫';
-    }
+  /** 注册 */
+  openRegisterDialog(): void {
+    const matDialogRef = this.dialog.open(RegisterDialogComponent, {
+      width: '300px',
+      data: {
+        wssServer: 'wss://192.168.200.21:7443',
+        workno: '1002',
+        pwd: '1234'
+      }
+    });
+    matDialogRef.afterClosed().subscribe(result => {
+      console.log(`register ${JSON.stringify(result)}`);
+      if (result) {
+        /* 注册信息 */
+        const myURI = 'sip:' + result.workno + '@' + result.wssServer.replace('wss://', '');
+        const simpleUserOptions: SimpleUserOptions = {
+          aor: myURI,
+          delegate: this.simpleUserDelegate,
+          media: {
+            remote: {
+              audio: this.getAudio('remoteAudio')
+            }
+          },
+          userAgentOptions: {
+            authorizationUsername: result.workno,
+            authorizationPassword: result.pwd,
+            displayName: result.workno,
+            uri: UserAgent.makeURI(myURI)
+          }
+        };
+        this.simpleUser = new SimpleUser(result.wssServer, simpleUserOptions);
+        /* 连接websocket */
+        this.simpleUser
+          .connect()
+          .then(() => {
+            console.log(`[${this.simpleUser.id}] connect success`);
+            /* 连接成功后注册 */
+            this.simpleUser
+              .register()
+              .then(() => {
+                this.agentInfo.wssServer = result.wssServer;
+                this.agentInfo.workno = result.workno;
+                this.agentInfo.pwd = result.pwd;
+                console.log(`[${this.simpleUser.id}] register success, register info=${JSON.stringify(result)}, angentInfo=${JSON.stringify(this.agentInfo)}`);
+                // 刚签入时自动置忙
+                this.updateStateCodeAndName(AGENT_STATE.busy.name);
+                // 5秒后自动置闲
+                of(null).pipe(delay(5000)).subscribe(
+                  x => {
+                  },
+                  err => {
+                  },
+                  () => {
+                    this.updateStateCodeAndName(AGENT_STATE.free.name);
+                  }
+                );
+              })
+              .catch((error: Error) => {
+                console.error(`[${this.simpleUser.id}] failed to register`);
+                console.error(error);
+                alert(`[${this.simpleUser.id}] failed to register.\n` + error);
+              });
+          })
+          .catch((error: Error) => {
+            console.error(`[${this.simpleUser.id}] failed to connect`);
+            console.error(error);
+            alert('Failed to connect.\n' + error);
+          });
+      }
+    });
   }
 
   /**
    * 更新坐席状态及名称
-   * @param stateCode 坐席状态码
+   * @param name 坐席状态码
    */
-  private updateStateCodeAndName(stateCode: number): void {
-    this.agentStateCode = stateCode;
-    this.agentStateName = AGENT_STATE[this.agentStateCode];
-    this.updateBusyBtnName();
+  private updateStateCodeAndName(name: string): void {
+    this.agentStateCode = AGENT_STATE[name].val;
+    this.agentStateName = AGENT_STATE[name].des;
+    console.log(`update angetState=${this.agentStateCode}, agentDes=${this.agentStateName}`);
+    this.updateBtn();
     this.updateTime();
-    this.busyBtnDisabled = this.agentStateCode === AGENT_STATE.talking.val || this.agentStateCode === AGENT_STATE.keeping.val;
-    this.keepBtnDisabled = this.agentStateCode !== AGENT_STATE.talking.val && this.agentStateCode !== AGENT_STATE.keeping.val;
-    this.callOutBtnDisabled = this.agentStateCode !== AGENT_STATE.free.val && this.agentStateCode !== AGENT_STATE.talking.val;
   }
 
   /**
@@ -225,9 +459,13 @@ export class TopBarComponent implements OnInit, OnDestroy {
   }
 
   /* 更新时间 */
-  private updateTime() {
-    this.clearTime();
-    this.setTimeStart();
+  updateTime() {
+    if (this.agentStateCode === AGENT_STATE.busy.val
+      || this.agentStateCode === AGENT_STATE.free.val
+      || this.agentStateCode === AGENT_STATE.making.val) {
+      this.clearTime();
+      this.setTimeStart();
+    }
   }
 
   /**
@@ -278,13 +516,11 @@ export class TopBarComponent implements OnInit, OnDestroy {
    * 置忙
    */
   setBusy() {
-    if (this.agentStateCode === 1) {
-      this.updateStateCodeAndName(2);
-    } else if (this.agentStateCode === 2 || this.agentStateCode === 5) {
-      this.updateStateCodeAndName(1);
+    if (this.agentStateCode === AGENT_STATE.free.val) {
+      this.updateStateCodeAndName(AGENT_STATE.busy.name);
+    } else if (this.agentStateCode === AGENT_STATE.busy.val || this.agentStateCode === AGENT_STATE.making.val) {
+      this.updateStateCodeAndName(AGENT_STATE.free.name);
     }
-    this.updateTime();
-    console.log(`set agent ${this.agentStateCode}, ${this.agentStateName}`);
   }
 
   /* 呼出 */
@@ -295,9 +531,7 @@ export class TopBarComponent implements OnInit, OnDestroy {
       this.called = this.phoneNo.value;
       console.log(`call out ${this.phoneNo.value}`);
       /*设置状态*/
-      this.updateStateCodeAndName(3);
-      /*设置外拨按钮*/
-      this.callOutBtnName = '挂机';
+      this.updateStateCodeAndName(AGENT_STATE.talking.name);
       this.makeCall();
     } else if (this.agentStateCode === AGENT_STATE.talking.val) {
       /*设置主被叫*/
@@ -305,13 +539,10 @@ export class TopBarComponent implements OnInit, OnDestroy {
       this.called = '';
       console.log(`hang up call ${this.phoneNo.value}`);
       /*设置状态*/
-      this.updateStateCodeAndName(AGENT_STATE.making.val);
-      /*设置外拨按钮*/
-      this.callOutBtnName = '外拨';
+      this.updateStateCodeAndName(AGENT_STATE.making.name);
       this.hangupCall();
     }
   }
-
 
   /* 呼入 */
   callIn() {
@@ -320,92 +551,8 @@ export class TopBarComponent implements OnInit, OnDestroy {
     this.called = this.agentInfo.workno;
     console.log(`call out ${this.phoneNo.value}`);
     /*设置状态*/
-    this.updateStateCodeAndName(AGENT_STATE.talking.val);
-    /*设置外拨按钮*/
-    this.callOutBtnName = '挂机';
-  }
-
-  /* 保持 */
-  keep() {
-    if (this.agentStateCode === AGENT_STATE.keeping.val) {
-      this.simpleUser.unhold()
-        .then(() => {
-          this.updateStateCodeAndName(AGENT_STATE.talking.val);
-          this.keepBtnName = '保持';
-        })
-        .catch((error: Error) => {
-          console.error(`[${this.simpleUser.id}] failed to hold call`);
-        });
-    } else {
-      this.simpleUser.hold()
-        .then(() => {
-          this.updateStateCodeAndName(AGENT_STATE.keeping.val);
-          this.keepBtnName = '恢复';
-        })
-        .catch((error: Error) => {
-          console.error(`[${this.simpleUser.id}] failed to hold call`);
-        });
-    }
-  }
-
-  /** 注册 */
-  openRegisterDialog(): void {
-    const matDialogRef = this.dialog.open(RegisterDialogComponent, {
-      width: '300px',
-      data: {
-        wssServer: 'wss://192.168.200.21:7443',
-        workno: '1002',
-        pwd: '1234'
-      }
-    });
-    matDialogRef.afterClosed().subscribe(result => {
-      console.log(`register ${JSON.stringify(result)}`);
-      if (result) {
-        /* 注册信息 */
-        const myURI = 'sip:' + result.workno + '@' + result.wssServer.replace('wss://', '');
-        const simpleUserOptions: SimpleUserOptions = {
-          aor: myURI,
-          delegate: this.simpleUserDelegate,
-          media: {
-            remote: {
-              audio: this.getAudio('remoteAudio')
-            }
-          },
-          userAgentOptions: {
-            authorizationUsername: result.workno,
-            authorizationPassword: result.pwd,
-            displayName: result.workno,
-            uri: UserAgent.makeURI(myURI)
-          }
-        };
-        this.simpleUser = new SimpleUser(result.wssServer, simpleUserOptions);
-        /* 连接websocket */
-        this.simpleUser
-          .connect()
-          .then(() => {
-            console.log(`[${this.simpleUser.id}] connect success`);
-            /* 连接成功后注册 */
-            this.simpleUser
-              .register()
-              .then(() => {
-                this.agentInfo.wssServer = result.wssServer;
-                this.agentInfo.workno = result.workno;
-                this.agentInfo.pwd = result.pwd;
-                console.log(`[${this.simpleUser.id}] register success, register info=${JSON.stringify(result)}, angentInfo=${JSON.stringify(this.agentInfo)}`);
-              })
-              .catch((error: Error) => {
-                console.error(`[${this.simpleUser.id}] failed to register`);
-                console.error(error);
-                alert(`[${this.simpleUser.id}] failed to register.\n` + error);
-              });
-          })
-          .catch((error: Error) => {
-            console.error(`[${this.simpleUser.id}] failed to connect`);
-            console.error(error);
-            alert('Failed to connect.\n' + error);
-          });
-      }
-    });
+    this.updateStateCodeAndName(AGENT_STATE.talking.name);
+    this.ringAudio.pause();
   }
 
   /* 外呼 */
@@ -428,6 +575,7 @@ export class TopBarComponent implements OnInit, OnDestroy {
       .answer()
       .then(() => {
         console.log(`[${this.simpleUser.id}] answer call success`);
+        this.callIn();
       })
       .catch((error: Error) => {
         console.error(`[${this.simpleUser.id}] answer call failed`);
@@ -436,30 +584,66 @@ export class TopBarComponent implements OnInit, OnDestroy {
       });
   }
 
-  /* 发送DTMF */
-  sendDtmf(): void {
-    if (this.simpleUser) {
-      console.log('init send dtmf success!');
-      const keypad = this.getButtons('keypad');
-      keypad.forEach((button) => {
-        button.addEventListener('click', () => {
-          const tone = button.textContent;
-          if (tone) {
-            this.simpleUser.sendDTMF(tone).then(() => {
-              console.log(`send dtmf=${tone}`);
-            });
-          }
-        });
-      });
-    }
-  }
-
   /* 挂机 */
   hangupCall(): void {
     this.simpleUser.hangup().catch((error: Error) => {
       console.error(`[${this.simpleUser.id}] failed to hangup call`);
       console.error(error);
       alert('Failed to hangup call.\n' + error);
+    });
+  }
+
+  /* 保持 */
+  hold() {
+    if (this.agentStateCode === AGENT_STATE.holding.val) {
+      this.simpleUser.unhold()
+        .then(() => {
+          this.updateStateCodeAndName(AGENT_STATE.talking.name);
+          console.log(`[${this.simpleUser.id}] unhold call`);
+        })
+        .catch((error: Error) => {
+          console.error(`[${this.simpleUser.id}] failed to unhold call`);
+        });
+    } else if (AGENT_STATE.talking.val === this.agentStateCode) {
+      this.simpleUser.hold()
+        .then(() => {
+          this.updateStateCodeAndName(AGENT_STATE.holding.name);
+          console.log(`[${this.simpleUser.id}] hold call`);
+        })
+        .catch((error: Error) => {
+          console.error(`[${this.simpleUser.id}] failed to hold call`);
+        });
+    }
+  }
+
+  /* 静音 */
+  mute() {
+    if (this.agentStateCode === AGENT_STATE.talking.val) {
+      this.simpleUser.mute();
+      this.updateStateCodeAndName(AGENT_STATE.mute.name);
+      console.log(`[${this.simpleUser.id}] mute call`);
+    } else {
+      this.simpleUser.unmute();
+      this.updateStateCodeAndName(AGENT_STATE.talking.name);
+      console.log(`[${this.simpleUser.id}] unmute call`);
+    }
+  }
+
+  /* 发送DTMF */
+  sendDtmf(): void {
+    console.log('init send dtmf success!');
+    const keypad = this.getButtons('keypad');
+    keypad.forEach((button) => {
+      button.addEventListener('click', () => {
+        if (this.simpleUser) {
+          const tone = button.textContent;
+          if (tone) {
+            this.simpleUser.sendDTMF(tone).then(() => {
+              console.log(`send dtmf=${tone}`);
+            });
+          }
+        }
+      });
     });
   }
 
