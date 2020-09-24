@@ -50,10 +50,27 @@
         <mat-icon>call</mat-icon>
         <span>{{callBtn.name}}</span>
       </button>
-      <button mat-button aria-label="" [disabled]="answerBtn.disabled" (click)="answerCall()">
-        <mat-icon>phone_in_talk</mat-icon>
-        <span>{{answerBtn.name}}</span>
-      </button>
+      <!--
+        通过对话框方式处理来电
+        <button mat-button aria-label="" [disabled]="answerBtn.disabled" (click)="answerCall()">
+          <mat-icon>phone_in_talk</mat-icon>
+          <span>{{answerBtn.name}}</span>
+        </button>
+      -->
+      <!--
+        测试来电功能
+        <button mat-button aria-label="" (click)="incomingDialog()">
+          <mat-icon>phone_in_talk</mat-icon>
+          <span>来电</span>
+        </button>
+      -->
+      <!--
+        测试来电功能
+        <button mat-button aria-label="" (click)="playRing()">
+          <mat-icon>phone_in_talk</mat-icon>
+          <span>来电铃声</span>
+        </button>
+      -->
       <button mat-button aria-label="" [disabled]="muteBtn.disabled" (click)="mute()">
         <mat-icon>mic_off</mat-icon>
         <span>{{muteBtn.name}}</span>

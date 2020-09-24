@@ -3,7 +3,7 @@ import {NgModule} from '@angular/core';
 
 import {AppComponent} from './app.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {RegisterDialogComponent, TopBarComponent} from './content/top-bar/top-bar.component';
+import {IncomingDialogComponent, RegisterDialogComponent, TopBarComponent} from './content/top-bar/top-bar.component';
 import {ContentComponent} from './content/content.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {HomePageComponent} from './content/home-page/home-page.component';
@@ -30,7 +30,8 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
     ContentComponent,
     HomePageComponent,
     CallRecordComponent,
-    RegisterDialogComponent
+    RegisterDialogComponent,
+    IncomingDialogComponent
   ],
     imports: [
         BrowserModule,

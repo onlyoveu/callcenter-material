@@ -147,7 +147,7 @@ export class TopBarComponent implements OnInit, OnDestroy {
     onCallReceived: (): void => {
       console.log(`[${this.agentInfo.workno}] received Call`);
       this.updateStateCodeAndName(AGENT_STATE.ring.name);
-      this.ringAudio.play();
+      this.incomingDialog();
     }
   };
 
@@ -209,7 +209,7 @@ export class TopBarComponent implements OnInit, OnDestroy {
   called: string;
 
   /* 铃声 */
-  ringAudio = new Audio('assets/ring.mp3');
+  ringAudio: HTMLAudioElement;
 
   /**
    * 格式化时间
@@ -224,6 +224,9 @@ export class TopBarComponent implements OnInit, OnDestroy {
     this.updateStateCodeAndName(AGENT_STATE.offline.name);
     // 初始化小键盘
     this.sendDtmf();
+    // 初始化铃声
+    this.ringAudio = new Audio('assets/ring.mp3');
+    this.ringAudio.loop = true;
   }
 
   ngOnDestroy(): void {
@@ -462,6 +465,7 @@ export class TopBarComponent implements OnInit, OnDestroy {
   updateTime() {
     if (this.agentStateCode === AGENT_STATE.busy.val
       || this.agentStateCode === AGENT_STATE.free.val
+      || this.agentStateCode === AGENT_STATE.ring.val
       || this.agentStateCode === AGENT_STATE.making.val) {
       this.clearTime();
       this.setTimeStart();
@@ -546,13 +550,8 @@ export class TopBarComponent implements OnInit, OnDestroy {
 
   /* 呼入 */
   callIn() {
-    /*设置主被叫*/
-    this.caller = this.simpleUser.id;
-    this.called = this.agentInfo.workno;
-    console.log(`call out ${this.phoneNo.value}`);
     /*设置状态*/
     this.updateStateCodeAndName(AGENT_STATE.talking.name);
-    this.ringAudio.pause();
   }
 
   /* 外呼 */
@@ -569,6 +568,37 @@ export class TopBarComponent implements OnInit, OnDestroy {
       });
   }
 
+  /* 应答对话框 */
+  incomingDialog() {
+    this.playRing();
+    const caller = Object.values(this.simpleUser)[5].incomingInviteRequest.message.from.uri.normal.user;
+    /* 设置主被叫 */
+    this.caller = caller;
+    this.called = this.simpleUser.id;
+    const matDialogRef = this.dialog.open(IncomingDialogComponent, {
+      data: caller,
+      position: {
+        top: '5em'
+      }
+    });
+    /* 设置超时 */
+    const RING_TIME_OUT = 10000;
+    setTimeout(() => {
+      matDialogRef.close();
+      console.log(`ring time out=${RING_TIME_OUT}, auto reject call, caller=${this.caller}, called=${this.called}`);
+    }, RING_TIME_OUT);
+    matDialogRef.afterClosed().subscribe(result => {
+      this.playRing();
+      if (result) {
+        /* 接听 */
+        this.answerCall();
+      } else {
+        /* 拒接 */
+        this.rejectCall();
+      }
+    });
+  }
+
   /* 应答 */
   answerCall(): void {
     this.simpleUser
@@ -581,6 +611,19 @@ export class TopBarComponent implements OnInit, OnDestroy {
         console.error(`[${this.simpleUser.id}] answer call failed`);
         console.error(error);
         alert('answer call failed.\n' + error);
+      });
+  }
+
+  /* 拒接 */
+  rejectCall(): void {
+    this.simpleUser
+      .decline()
+      .then(() => {
+        console.log(`[${this.simpleUser.id}] reject call success`);
+      })
+      .catch((error: Error) => {
+        console.error(`[${this.simpleUser.id}] reject call failed`);
+        console.error(error);
       });
   }
 
@@ -677,6 +720,17 @@ export class TopBarComponent implements OnInit, OnDestroy {
   showDialpad() {
     this.dialpadHidden = !this.dialpadHidden;
   }
+
+  /**
+   * 播放铃声
+   */
+  playRing() {
+    if (this.ringAudio.paused) {
+      this.ringAudio.play();
+    } else {
+      this.ringAudio.pause();
+    }
+  }
 }
 
 /**
@@ -691,6 +745,25 @@ export class RegisterDialogComponent {
   constructor(
     public dialogRef: MatDialogRef<RegisterDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: AgentInfo) {
+  }
+
+  onNoClick(): void {
+    this.dialogRef.close();
+  }
+}
+
+/**
+ * 来电对话框
+ */
+@Component({
+  selector: 'app-incoming-dialog',
+  templateUrl: './incoming-dialog.component.html',
+  styleUrls: ['./top-bar.component.css']
+})
+export class IncomingDialogComponent {
+  constructor(
+    public dialogRef: MatDialogRef<IncomingDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: string) {
   }
 
   onNoClick(): void {
