@@ -389,7 +389,9 @@ export class TopBarComponent implements OnInit, OnDestroy {
           aor: myURI,
           delegate: this.simpleUserDelegate,
           media: {
+            constraints: {audio: true, video: true},
             remote: {
+              video: this.getVideo('remoteVideo'),
               audio: this.getAudio('remoteAudio')
             }
           },
@@ -694,6 +696,15 @@ export class TopBarComponent implements OnInit, OnDestroy {
   getAudio(id: string): HTMLAudioElement {
     const el = document.getElementById(id);
     if (!(el instanceof HTMLAudioElement)) {
+      throw new Error(`Element "${id}" not found or not an audio element.`);
+    }
+    return el;
+  }
+
+  /* 取视播放器 */
+  getVideo(id: string): HTMLVideoElement {
+    const el = document.getElementById(id);
+    if (!(el instanceof HTMLVideoElement)) {
       throw new Error(`Element "${id}" not found or not an audio element.`);
     }
     return el;
