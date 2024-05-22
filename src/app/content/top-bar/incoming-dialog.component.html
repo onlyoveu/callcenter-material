@@ -1,0 +1,8 @@
+<h1 mat-dialog-title>来电</h1>
+<div mat-dialog-content>
+  <label>{{data}}</label>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="onNoClick()">拒接</button>
+  <button mat-button [mat-dialog-close]="data" cdkFocusInitial>接听</button>
+</div>

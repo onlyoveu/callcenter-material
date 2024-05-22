@@ -2,9 +2,9 @@
   <mat-toolbar-row class="top-bar-row">
 
     <!-- logo -->
-<!--    <a mat-icon-button aria-label="">-->
-<!--      <mat-icon title="工作台">headset_mic</mat-icon>-->
-<!--    </a>-->
+    <!--    <a mat-icon-button aria-label="">-->
+    <!--      <mat-icon title="工作台">headset_mic</mat-icon>-->
+    <!--    </a>-->
     <!-- logo -->
 
     <!--    搜索框开始    -->
@@ -19,7 +19,7 @@
     <!--    搜索框结束    -->
 
     <!--    状态栏开始    -->
-    <div style="display: flex">
+    <div class="info-div">
       <div class="state-div"></div>
       主叫:
       <span>{{caller}}</span>
@@ -27,43 +27,118 @@
       被叫:
       <span>{{called}}</span>
       <div class="state-div"></div>
-      <span>{{agentStateName}}</span>
+      <span>[{{agentStateName}}]</span>
       <div class="state-div"></div>
       <span>{{time}}</span>
     </div>
     <!--    状态栏结束    -->
+
+    <!-- 音频 audio 开始-->
+    <audio id="remoteAudio" preload="auto" controls hidden></audio>
+    <!-- 音频 audio 结束-->
 
     <!-- This fills the remaining space of the current row -->
     <span class="example-fill-remaining-space"></span>
 
     <!--    操作栏开始    -->
     <div>
-      <button mat-button aria-label="" [disabled]="busyBtnDisabled" (click)="setBusy()">
+      <button mat-button aria-label="" [disabled]="busyBtn.disabled" (click)="setBusy()">
         <mat-icon>remove_circle</mat-icon>
-        <span>{{busyBtnName}}</span>
+        <span>{{busyBtn.name}}</span>
       </button>
-      <button mat-button aria-label="" [disabled]="keepBtnDisabled" (click)="keep()">
-        <mat-icon>settings_phone</mat-icon>
-        <span>{{keepBtnName}}</span>
-      </button>
-      <button mat-button aria-label="" [disabled]="callOutBtnDisabled" (click)="callOut()">
-        <mat-icon>phone_in_talk</mat-icon>
-        <span>{{callOutBtnName}}</span>
-      </button>
-      <button mat-button aria-label="">
+      <button mat-button aria-label="" [disabled]="callBtn.disabled" (click)="callOut()">
         <mat-icon>call</mat-icon>
-        <span>软电话</span>
+        <span>{{callBtn.name}}</span>
+      </button>
+      <!--
+        通过对话框方式处理来电
+        <button mat-button aria-label="" [disabled]="answerBtn.disabled" (click)="answerCall()">
+          <mat-icon>phone_in_talk</mat-icon>
+          <span>{{answerBtn.name}}</span>
+        </button>
+      -->
+      <!--
+        测试来电功能
+        <button mat-button aria-label="" (click)="incomingDialog()">
+          <mat-icon>phone_in_talk</mat-icon>
+          <span>来电</span>
+        </button>
+      -->
+      <!--
+        测试来电功能
+        <button mat-button aria-label="" (click)="playRing()">
+          <mat-icon>phone_in_talk</mat-icon>
+          <span>来电铃声</span>
+        </button>
+      -->
+      <button mat-button aria-label="" [disabled]="muteBtn.disabled" (click)="mute()">
+        <mat-icon>mic_off</mat-icon>
+        <span>{{muteBtn.name}}</span>
+      </button>
+      <button mat-button aria-label="" [disabled]="holdBtn.disabled" (click)="hold()">
+        <mat-icon>settings_phone</mat-icon>
+        <span>{{holdBtn.name}}</span>
       </button>
     </div>
     <!--    操作栏结束    -->
 
     <!--    个人信息开始    -->
     <div>
-      <a mat-button aria-label="">
+      <a mat-button aria-label="" (click)="openRegisterDialog()">
         <mat-icon>person</mat-icon>
-        <span>张三</span>
+        <span>{{agentInfo.workno}}</span>
       </a>
     </div>
     <!--    个人信息结束    -->
+
+    <!-- dialpad 开始-->
+    <button mat-button aria-label="" (click)="showDialpad()">
+      <mat-icon>dialpad</mat-icon>
+    </button>
+    <!-- dialpad 结束-->
+
+    <!-- DTMF 开始 -->
+    <div class="dialpad">
+      <div [hidden]="dialpadHidden">
+        <div>
+          <button class="keypad">1</button>
+          <button class="keypad">2</button>
+          <button class="keypad">3</button>
+        </div>
+        <div>
+          <button class="keypad">4</button>
+          <button class="keypad">5</button>
+          <button class="keypad">6</button>
+        </div>
+        <div>
+          <button class="keypad">7</button>
+          <button class="keypad">8</button>
+          <button class="keypad">9</button>
+        </div>
+        <div>
+          <button class="keypad">*</button>
+          <button class="keypad">0</button>
+          <button class="keypad">#</button>
+        </div>
+      </div>
+    </div>
+    <!-- DTMF 结束 -->
+    <!-- 视频开始 -->
+    <div id="content-video-audio" class="video-audio">
+      <div class="two-column-boxes">
+        <div class="column-box">
+          <div class="demo-window">
+            <div class="demo-view">
+              <video id="remoteVideo" muted="muted"></video>
+            </div>
+            <div class="video-left">
+              <h4>Alice's View</h4>
+              <h5>Demo user one</h5>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 视频结束 -->
   </mat-toolbar-row>
 </mat-toolbar>

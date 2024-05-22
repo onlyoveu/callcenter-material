@@ -1,0 +1,196 @@
+<div class="main-div-home-page">
+  <!--左侧-->
+  <div class="left-div-home-page">
+    <!--客户信息-->
+    <div style="height: 240px">
+      <mat-tab-group>
+        <mat-tab label="客户信息">
+          <!--客户信息-->
+          <table id="cst-table">
+            <tr>
+              <td>客户姓名：<span title="{{cstInfo.cstName}}">{{cstInfo.cstName}}</span></td>
+              <td>话费余额：{{cstInfo.cstBlc}}</td>
+              <td>开通状态：{{cstInfo.cstState}}</td>
+              <td>一证五户：<span class="tdtip">{{cstInfo.cstOneFive}}</span></td>
+            </tr>
+            <tr>
+              <td>当前可用积分：</td>
+              <td>合约到期时间：</td>
+              <td>近6个月平均话费：</td>
+              <td>套餐类型：</td>
+            </tr>
+            <tr>
+              <td>下月执行资费：</td>
+              <td>发展渠道：</td>
+              <td>发展人：</td>
+              <td>网别：</td>
+            </tr>
+          </table>
+          <!--客户信息-->
+        </mat-tab>
+        <mat-tab label="流量使用情况">
+          流量使用情况
+        </mat-tab>
+        <mat-tab label="主产品">
+          主产品
+        </mat-tab>
+        <mat-tab label="附加产品">
+          附加产品
+        </mat-tab>
+        <mat-tab label="合约产品">
+          合约产品
+        </mat-tab>
+        <mat-tab label="资费信息">
+          多渠道接触查询
+        </mat-tab>
+        <mat-tab label="融合成员">
+          融合成员
+        </mat-tab>
+        <mat-tab label="张本信息">
+          张本信息
+        </mat-tab>
+        <mat-tab label="每月查处套餐使用">
+          每月查处套餐使用
+        </mat-tab>
+        <mat-tab label="宽带信息">
+          <!--宽带信息-->
+          <table id="net-table">
+            <tr>
+              <td>宽带上网账号：</td>
+              <td>产品名称：</td>
+              <td>机主姓名：</td>
+              <td>身份证号：</td>
+            </tr>
+            <tr>
+              <td>IPTV账号：</td>
+              <td>接入方式：</td>
+              <td>速率：</td>
+              <td>宽带包年资费信息：</td>
+            </tr>
+            <tr>
+              <td colspan="2">宽带主产品起始时间：</td>
+              <td colspan="2">宽带主产品结束时间：</td>
+            </tr>
+            <tr>
+              <td colspan="2">宽带包年开始时间：</td>
+              <td colspan="2">宽带包年结束时间：</td>
+            </tr>
+            <tr>
+              <td>装机地址：</td>
+              <td></td>
+              <td></td>
+              <td></td>
+          </table>
+          <!--宽带信息-->
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+    <!--客户信息-->
+
+    <!--快速查询-->
+    <div>
+      <mat-tab-group>
+        <mat-tab label="任务脚本">
+          话费查询
+        </mat-tab>
+        <mat-tab label="话费预览">
+          话费预览
+        </mat-tab>
+        <mat-tab label="客户模版详情">
+          客户模版详情
+        </mat-tab>
+        <mat-tab label="营销业务">
+          营销业务
+        </mat-tab>
+        <mat-tab label="接触记录">
+          接触记录
+        </mat-tab>
+        <mat-tab label="多渠道接触查询">
+          多渠道接触查询
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+    <!--快速查询-->
+  </div>
+  <!--左侧-->
+
+  <!--居中-->
+  <div class="mid-div-home-page"></div>
+  <!--居中-->
+
+  <!--右侧-->
+  <div class="right-div-home-page">
+    <!--结果集-->
+    <div>
+      <form (ngSubmit)="onSubmit()" [formGroup]="comResultFrom">
+        <mat-form-field style="width: 100%">
+          <input matInput placeholder="预约时间" type="datetime-local" formControlName="comDateTime">
+        </mat-form-field>
+        <mat-form-field>
+          <mat-select placeholder="沟通结果" required formControlName="comResult">
+            <mat-option value="">请选择</mat-option>
+            <mat-option value="0">同意</mat-option>
+            <mat-option value="1">不同意</mat-option>
+          </mat-select>
+          <mat-error *ngIf="comResultFrom.invalid">请选择沟通结果</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <textarea matInput placeholder="沟通记录" formControlName="comRecord"></textarea>
+        </mat-form-field>
+        <button mat-button type="submit" [disabled]="!comResultFrom.valid">提交</button>
+      </form>
+    </div>
+    <!--结果集-->
+
+    <!--任务及号码信息-->
+    <div>
+      <!--任务信息-->
+      <mat-form-field>
+        <mat-label>任务信息</mat-label>
+        <mat-select (selectionChange)="changeTask($event.value)" [value]="taskInfoSelect">
+          <mat-option *ngFor="let taskInfo of taskInfos" [value]="taskInfo.taskId">
+            {{taskInfo.taskName}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <!--任务信息-->
+
+      <!--号码信息-->
+      <mat-tab-group color="primary">
+        <mat-tab label="未拨打">
+          <div class="num-div-home-page">
+            <table mat-table [dataSource]="dataSource">
+
+              <ng-container matColumnDef="phone">
+                <td mat-cell class="phone-table-td" *matCellDef="let element"> {{element.phone}} </td>
+              </ng-container>
+
+              <ng-container matColumnDef="state">
+                <td mat-cell *matCellDef="let element"> {{element.state}} </td>
+              </ng-container>
+
+              <ng-container matColumnDef="option">
+                <td mat-cell *matCellDef="let element">
+                  <button mat-icon-button (click)="callOut(element.phone)">
+                    <mat-icon title="外呼">phone_in_talk</mat-icon>
+                  </button>
+                  <mat-icon></mat-icon>
+                </td>
+              </ng-container>
+
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+            <mat-paginator class="mat-paginator-sticky" [pageSizeOptions]="[10]" hidePageSize
+                           showFirstLastButtons></mat-paginator>
+          </div>
+        </mat-tab>
+        <mat-tab label="已拨打">
+          已拨打
+        </mat-tab>
+      </mat-tab-group>
+      <!--号码信息-->
+    </div>
+    <!--任务及号码信息-->
+  </div>
+  <!--右侧-->
+</div>
