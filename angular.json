@@ -123,5 +123,8 @@
       }
     }
   },
-  "defaultProject": "callcenter-material"
+  "defaultProject": "callcenter-material",
+  "cli": {
+    "analytics": "557badea-7fa9-43ba-94ad-d1df8e62d259"
+  }
 }

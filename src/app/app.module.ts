@@ -53,7 +53,7 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
         // AppRoutingModule
     ],
   providers: [],
-  entryComponents: [HomePageComponent, CallRecordComponent],
+  // entryComponents: [HomePageComponent, CallRecordComponent],
   bootstrap: [AppComponent]
 })
 export class AppModule {
